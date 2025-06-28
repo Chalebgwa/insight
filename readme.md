@@ -173,7 +173,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Support
 
-For issues and feature requests, please [open an issue](https://github.com/yourusername/insight/issues).
+For issues and feature requests, please [open an issue](https://github.com/chalebgwa/insight/issues).
 
 ---
 
