@@ -177,7 +177,7 @@ For issues and feature requests, please [open an issue](https://github.com/chale
 
 ---
 
-**Insight Web Pentesting Suite** © 2023 - Security made visible  
-[![GitHub Stars](https://img.shields.io/github/stars/yourusername/insight?style=social)](https://github.com/yourusername/insight) 
+**Insight Web Pentesting Suite** © 2025 - Security made visible  
+[![GitHub Stars](https://img.shields.io/github/stars/chalebgwa/insight?style=social)](https://github.com/chalebgwa/insight) 
 [![Python Version](https://img.shields.io/badge/Python-3.7%2B-blue)](https://python.org) 
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
