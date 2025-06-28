@@ -1,6 +1,6 @@
 # Insight Web Pentesting Suite
 
-![Insight Banner](https://i.imgur.com/InsightBanner.png)  
+![Insight Banner](logo.png)  
 *Advanced web security assessment toolkit for professionals*
 
 ## Overview
