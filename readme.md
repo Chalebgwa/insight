@@ -35,6 +35,7 @@
 ### Requirements
 - Python 3.7+
 - Pip package manager
+- Python packages listed in `requirements.txt`
 
 ### Quick Install
 ```bash
