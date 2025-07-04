@@ -25,7 +25,7 @@
 - **Executive Summary**: Quick overview of findings
 
 ### ⚡ Performance Optimized
-- **Multi-threaded Scanning**: Configurable thread pools
+- **Asynchronous Scanning**: Configurable concurrency
 - **Smart Resource Management**: Efficient memory handling
 - **Polite Scanning**: Respectful request throttling
 - **Randomized User Agents**: Evade basic detection systems
@@ -65,7 +65,8 @@ pip install insight-pentest
   -p 80 443 8080 \
   -e .php .bak .old \
   -c 3 \
-  -o report.json
+  -o report.json \
+  --html-report report.html
 ```
 
 ### Command Options
@@ -76,9 +77,11 @@ pip install insight-pentest
 | `-s FILE` | Subdomain enumeration wordlist | |
 | `-p PORTS` | Ports to scan (space separated) | 21,22,80,443,... |
 | `-e EXTS` | File extensions for brute-force | .php,.html,.txt |
-| `-t THREADS` | Maximum threads | 30 |
+| `-m MAX_TASKS` | Maximum concurrent tasks | 30 |
 | `-c DEPTH` | Crawling depth | 2 |
 | `-o FILE` | JSON output file | |
+| `--html-report FILE` | Save HTML summary report | |
+| `--pdf-report FILE` | Save PDF summary report | |
 
 ## Modules Overview
 
@@ -89,7 +92,7 @@ pip install insight-pentest
 
 ### 2. Subdomain Enumerator
 - Wildcard DNS detection
-- Multi-threaded DNS resolution
+- Concurrent DNS resolution
 - Live results streaming
 
 ### 3. Directory Bruteforcer
@@ -154,6 +157,24 @@ git clone https://github.com/danielmiessler/SecLists.git
   -d SecLists/Discovery/Web-Content/raft-large-directories.txt \
   -s SecLists/Discovery/DNS/subdomains-top1million-5000.txt
 ```
+
+## Plugins
+
+Insight can be extended with custom plugins placed in the `plugins/` directory.
+Each plugin must expose a `run(target)` function. All discovered plugins are
+executed automatically and their results are included in the final summary.
+
+### Writing a Plugin
+
+```python
+# plugins/my_plugin.py
+from modules.print_status import print_status
+
+def run(target):
+    print_status(f"Running my plugin for {target}", "info")
+    return {"status": "ok"}
+```
+
 
 ## Contribution
 
