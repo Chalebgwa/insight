@@ -42,6 +42,7 @@
 git clone https://github.com/yourusername/insight.git
 cd insight
 pip install -r requirements.txt
+pip install .
 chmod +x insight.py
 ```
 
