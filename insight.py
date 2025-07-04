@@ -102,11 +102,13 @@ def main():
         help="Ports to scan",
     )
     parser.add_argument(
-        "-t",
-        "--threads",
+
+        "-m",
+        "--max-tasks",
         type=int,
-        default=config.get("threads", 30),
-        help="Max threads",
+        default=30,
+        help="Maximum concurrent tasks",
+
     )
     parser.add_argument(
         "-e",
@@ -186,16 +188,16 @@ def main():
             args.url,
             args.dir_wordlist,
             extensions=args.extensions,
-            threads=args.threads,
+            max_tasks=args.max_tasks,
         )
         results["modules"]["directory_bruteforce"] = dir_results
 
     if args.sub_wordlist:
         domain = urlparse(args.url).netloc
-        sub_results = subdomain_enumeration(domain, args.sub_wordlist, threads=args.threads)
+        sub_results = subdomain_enumeration(domain, args.sub_wordlist, max_tasks=args.max_tasks)
         results["modules"]["subdomain_enumeration"] = sub_results
 
-    port_results = port_scan(args.url, args.ports, threads=args.threads)
+    port_results = port_scan(args.url, args.ports, max_tasks=args.max_tasks)
     results["modules"]["port_scan"] = port_results
 
     ssl_results = ssl_analyzer(args.url)
