@@ -154,6 +154,24 @@ git clone https://github.com/danielmiessler/SecLists.git
   -s SecLists/Discovery/DNS/subdomains-top1million-5000.txt
 ```
 
+## Plugins
+
+Insight can be extended with custom plugins placed in the `plugins/` directory.
+Each plugin must expose a `run(target)` function. All discovered plugins are
+executed automatically and their results are included in the final summary.
+
+### Writing a Plugin
+
+```python
+# plugins/my_plugin.py
+from modules.print_status import print_status
+
+def run(target):
+    print_status(f"Running my plugin for {target}", "info")
+    return {"status": "ok"}
+```
+
+
 ## Contribution
 
 We welcome contributions! Please follow these steps:

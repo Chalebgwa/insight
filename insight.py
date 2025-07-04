@@ -16,6 +16,7 @@ from modules.header_analyzer import header_analyzer
 from modules.crawler import crawl_and_analyze
 from modules.summary import print_summary
 from modules.print_status import print_status
+from modules.plugin_loader import load_plugins
 
 
 def main():
@@ -108,6 +109,15 @@ def main():
 
     crawl_results = crawl_and_analyze(args.url, depth=args.crawl_depth)
     results["modules"]["crawler"] = crawl_results
+
+    plugins = load_plugins()
+    for plugin in plugins:
+        name = plugin.__name__.split('.')[-1]
+        try:
+            plugin_results = plugin.run(args.url)
+            results["modules"][name] = plugin_results
+        except Exception as e:
+            print_status(f"Plugin {name} failed: {e}", "error")
 
     scan_duration = time.time() - start_time
     print_status(f"Scan completed in {scan_duration:.2f} seconds", "success")
