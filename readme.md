@@ -64,7 +64,8 @@ pip install insight-pentest
   -p 80 443 8080 \
   -e .php .bak .old \
   -c 3 \
-  -o report.json
+  -o report.json \
+  --html-report report.html
 ```
 
 ### Command Options
@@ -78,6 +79,8 @@ pip install insight-pentest
 | `-m MAX_TASKS` | Maximum concurrent tasks | 30 |
 | `-c DEPTH` | Crawling depth | 2 |
 | `-o FILE` | JSON output file | |
+| `--html-report FILE` | Save HTML summary report | |
+| `--pdf-report FILE` | Save PDF summary report | |
 
 ## Modules Overview
 
