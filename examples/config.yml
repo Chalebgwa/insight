@@ -1,0 +1,12 @@
+# Example configuration file for Insight
+url: https://target.com
+# Wordlist paths
+dir_wordlist: wordlists/dirs.txt
+sub_wordlist: wordlists/subdomains.txt
+# Ports to scan
+ports: [80, 443, 8080]
+# Optional file extensions for directory brute forcing
+extensions: ["", ".php", ".bak"]
+threads: 30
+crawl_depth: 2
+output: results.json
