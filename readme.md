@@ -25,7 +25,7 @@
 - **Executive Summary**: Quick overview of findings
 
 ### ⚡ Performance Optimized
-- **Multi-threaded Scanning**: Configurable thread pools
+- **Asynchronous Scanning**: Configurable concurrency
 - **Smart Resource Management**: Efficient memory handling
 - **Polite Scanning**: Respectful request throttling
 - **Randomized User Agents**: Evade basic detection systems
@@ -75,7 +75,7 @@ pip install insight-pentest
 | `-s FILE` | Subdomain enumeration wordlist | |
 | `-p PORTS` | Ports to scan (space separated) | 21,22,80,443,... |
 | `-e EXTS` | File extensions for brute-force | .php,.html,.txt |
-| `-t THREADS` | Maximum threads | 30 |
+| `-m MAX_TASKS` | Maximum concurrent tasks | 30 |
 | `-c DEPTH` | Crawling depth | 2 |
 | `-o FILE` | JSON output file | |
 
@@ -88,7 +88,7 @@ pip install insight-pentest
 
 ### 2. Subdomain Enumerator
 - Wildcard DNS detection
-- Multi-threaded DNS resolution
+- Concurrent DNS resolution
 - Live results streaming
 
 ### 3. Directory Bruteforcer
