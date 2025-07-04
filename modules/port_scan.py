@@ -1,12 +1,12 @@
 import sys
 import socket
+import asyncio
 from urllib.parse import urlparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from .print_status import print_status
 from .colors import Colors
 
 
-def port_scan(target, ports, threads=100):
+def port_scan(target, ports, max_tasks=100):
     """Advanced port scanning with service detection"""
     print_status(f"Scanning ports for {target}", "info")
     parsed = urlparse(target)
@@ -42,21 +42,21 @@ def port_scan(target, ports, threads=100):
     total = len(ports)
     processed = 0
 
-    print_status(f"Scanning {total} ports with {threads} threads", "info")
+    print_status(f"Scanning {total} ports with {max_tasks} max tasks", "info")
 
-    def scan_port(port):
+    async def scan_port(port, sem):
         nonlocal processed
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(1)
-                result = s.connect_ex((host, port))
-                if result == 0:
-                    service = services.get(port, "Unknown")
-                    open_ports.append((port, service))
-                    return (port, service)
-        except Exception:
-            return None
-        finally:
+        async with sem:
+            try:
+                reader, writer = await asyncio.open_connection(host, port)
+                writer.close()
+                if hasattr(writer, 'wait_closed'):
+                    await writer.wait_closed()
+                service = services.get(port, "Unknown")
+                open_ports.append((port, service))
+                result = (port, service)
+            except Exception:
+                result = None
             processed += 1
             percent = int(processed / total * 100)
             bar_length = 40
@@ -64,13 +64,17 @@ def port_scan(target, ports, threads=100):
             bar = f"{Colors.BG_BLUE}{'█' * filled_length}{Colors.END}{'░' * (bar_length - filled_length)}"
             sys.stdout.write(f"\r  {bar} {percent}% ({processed}/{total}) ")
             sys.stdout.flush()
+            return result
 
-    with ThreadPoolExecutor(max_workers=threads) as executor:
-        futures = [executor.submit(scan_port, port) for port in ports]
-        for future in as_completed(futures):
-            if future.result():
-                port, service = future.result()
+    async def runner():
+        sem = asyncio.Semaphore(max_tasks)
+        tasks = [asyncio.create_task(scan_port(p, sem)) for p in ports]
+        for coro in asyncio.as_completed(tasks):
+            res = await coro
+            if res:
+                port, service = res
                 print(f"\n  {Colors.GREEN}✓ Port {port}/tcp open ({service}){Colors.END}")
+        print(f"\r{' ' * 70}")
+        return open_ports
 
-    print(f"\r{' ' * 70}")
-    return open_ports
+    return asyncio.run(runner())
