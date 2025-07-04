@@ -21,6 +21,7 @@ from modules.summary import print_summary
 
 from modules.print_status import print_status
 from modules.plugin_loader import load_plugins
+from modules import generate_html_report, generate_pdf_report
 
 
 
@@ -132,6 +133,22 @@ def main():
         "--output",
         default=config.get("output"),
         help="Output file for results",
+    )
+    parser.add_argument(
+        "--log-level",
+        default=config.get("log_level", "INFO"),
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Logging verbosity",
+    )
+    parser.add_argument(
+        "--html-report",
+        default=config.get("html_report"),
+        help="Write HTML report to file",
+    )
+    parser.add_argument(
+        "--pdf-report",
+        default=config.get("pdf_report"),
+        help="Write PDF report to file",
     )
 
 
