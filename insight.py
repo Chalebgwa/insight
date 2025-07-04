@@ -16,6 +16,7 @@ from modules.header_analyzer import header_analyzer
 from modules.crawler import crawl_and_analyze
 from modules.summary import print_summary
 from modules.print_status import print_status
+from modules.reporting import generate_html_report, generate_pdf_report
 
 
 def main():
@@ -69,6 +70,8 @@ def main():
     )
     parser.add_argument("-c", "--crawl-depth", type=int, default=2, help="Crawling depth")
     parser.add_argument("-o", "--output", help="Output file for results")
+    parser.add_argument("--html-report", help="Write HTML summary to FILE")
+    parser.add_argument("--pdf-report", help="Write PDF summary to FILE")
 
     args = parser.parse_args()
 
@@ -118,6 +121,14 @@ def main():
         with open(args.output, "w") as f:
             json.dump(results, f, indent=2)
         print_status(f"Results saved to {args.output}", "success")
+
+    if args.html_report:
+        generate_html_report(results, args.html_report)
+        print_status(f"HTML report saved to {args.html_report}", "success")
+
+    if args.pdf_report:
+        generate_pdf_report(results, args.pdf_report)
+        print_status(f"PDF report saved to {args.pdf_report}", "success")
 
 
 if __name__ == "__main__":
