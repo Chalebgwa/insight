@@ -8,6 +8,7 @@ import os
 import logging
 from urllib.parse import urlparse
 from datetime import datetime
+import yaml
 
 from modules.colors import BANNER, Colors
 from modules.directory_bruteforce import directory_bruteforce
@@ -22,65 +23,115 @@ from modules.summary import print_summary
 
 def main():
     print(BANNER)
+
+    # Parse optional configuration file first
+    config_parser = argparse.ArgumentParser(add_help=False)
+    config_parser.add_argument("--config", help="YAML configuration file")
+    config_args, remaining = config_parser.parse_known_args()
+
+    config = {}
+    if config_args.config:
+        try:
+            with open(config_args.config) as f:
+                config = yaml.safe_load(f) or {}
+            print_status(f"Loaded configuration from {config_args.config}", "info")
+        except FileNotFoundError:
+            print_status(f"Config file not found: {config_args.config}", "error")
+            sys.exit(1)
+        except yaml.YAMLError as e:
+            print_status(f"Invalid config file: {e}", "error")
+            sys.exit(1)
+
     parser = argparse.ArgumentParser(
         description="Insight Web Pentesting Framework",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        parents=[config_parser],
     )
-    parser.add_argument("-u", "--url", required=True, help="Target URL")
-    parser.add_argument("-d", "--dir-wordlist", help="Directory brute-force wordlist")
-    parser.add_argument("-s", "--sub-wordlist", help="Subdomain enumeration wordlist")
+    parser.add_argument(
+        "-u",
+        "--url",
+        required=not config.get("url"),
+        default=config.get("url"),
+        help="Target URL",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir-wordlist",
+        default=config.get("dir_wordlist"),
+        help="Directory brute-force wordlist",
+    )
+    parser.add_argument(
+        "-s",
+        "--sub-wordlist",
+        default=config.get("sub_wordlist"),
+        help="Subdomain enumeration wordlist",
+    )
     parser.add_argument(
         "-p",
         "--ports",
         nargs="+",
         type=int,
-        default=[
-            21,
-            22,
-            23,
-            25,
-            53,
-            80,
-            110,
-            143,
-            443,
-            445,
-            993,
-            995,
-            1433,
-            3306,
-            3389,
-            5432,
-            5900,
-            6379,
-            8000,
-            8080,
-            8443,
-            9000,
-            27017,
-        ],
+        default=config.get(
+            "ports",
+            [
+                21,
+                22,
+                23,
+                25,
+                53,
+                80,
+                110,
+                143,
+                443,
+                445,
+                993,
+                995,
+                1433,
+                3306,
+                3389,
+                5432,
+                5900,
+                6379,
+                8000,
+                8080,
+                8443,
+                9000,
+                27017,
+            ],
+        ),
         help="Ports to scan",
     )
-    parser.add_argument("-t", "--threads", type=int, default=30, help="Max threads")
+    parser.add_argument(
+        "-t",
+        "--threads",
+        type=int,
+        default=config.get("threads", 30),
+        help="Max threads",
+    )
     parser.add_argument(
         "-e",
         "--extensions",
         nargs="+",
-        default=["", ".php", ".html", ".txt", ".bak", ".old", ".zip"],
+        default=config.get("extensions", ["", ".php", ".html", ".txt", ".bak", ".old", ".zip"]),
         help="File extensions for brute-force",
     )
-    parser.add_argument("-c", "--crawl-depth", type=int, default=2, help="Crawling depth")
-    parser.add_argument("-o", "--output", help="Output file for results")
-
     parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging verbosity",
+        "-c",
+        "--crawl-depth",
+        type=int,
+        default=config.get("crawl_depth", 2),
+        help="Crawling depth",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=config.get("output"),
+        help="Output file for results",
     )
 
 
-    args = parser.parse_args()
+    args = parser.parse_args(remaining)
+
 
     os.makedirs("logs", exist_ok=True)
     log_file = os.path.join(
