@@ -19,6 +19,7 @@ from modules.crawler import crawl_and_analyze
 from modules.summary import print_summary
 
 
+
 def main():
     print(BANNER)
     parser = argparse.ArgumentParser(
@@ -70,12 +71,14 @@ def main():
     )
     parser.add_argument("-c", "--crawl-depth", type=int, default=2, help="Crawling depth")
     parser.add_argument("-o", "--output", help="Output file for results")
+
     parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Logging verbosity",
     )
+
 
     args = parser.parse_args()
 
@@ -168,6 +171,14 @@ def main():
             f"Results saved to {args.output}",
             extra={"status": "success"},
         )
+
+    if args.html_report:
+        generate_html_report(results, args.html_report)
+        print_status(f"HTML report saved to {args.html_report}", "success")
+
+    if args.pdf_report:
+        generate_pdf_report(results, args.pdf_report)
+        print_status(f"PDF report saved to {args.pdf_report}", "success")
 
 
 if __name__ == "__main__":
