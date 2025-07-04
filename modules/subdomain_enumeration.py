@@ -1,12 +1,12 @@
 import sys
 import socket
 import random
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
 from .print_status import print_status
 from .colors import Colors
 
 
-def subdomain_enumeration(domain, wordlist_path, threads=50):
+def subdomain_enumeration(domain, wordlist_path, max_tasks=50):
     """Advanced subdomain enumeration with wildcard detection"""
     print_status(f"Enumerating subdomains for {domain}", "info")
 
@@ -28,18 +28,19 @@ def subdomain_enumeration(domain, wordlist_path, threads=50):
     total = len(subdomains)
     processed = 0
 
-    print_status(f"Scanning {total} subdomains with {threads} threads", "info")
+    print_status(f"Scanning {total} subdomains with {max_tasks} max tasks", "info")
 
-    def check_subdomain(subdomain):
+    async def check_subdomain(subdomain, sem, loop):
         nonlocal processed
         full_domain = f"{subdomain}.{domain}"
-        try:
-            ip = socket.gethostbyname(full_domain)
-            found.append((full_domain, ip))
-            return (full_domain, ip)
-        except socket.gaierror:
-            return None
-        finally:
+        async with sem:
+            try:
+                infos = await loop.getaddrinfo(full_domain, None)
+                ip = infos[0][4][0]
+                found.append((full_domain, ip))
+                result = (full_domain, ip)
+            except socket.gaierror:
+                result = None
             processed += 1
             percent = int(processed / total * 100)
             bar_length = 40
@@ -47,13 +48,18 @@ def subdomain_enumeration(domain, wordlist_path, threads=50):
             bar = f"{Colors.BG_BLUE}{'█' * filled_length}{Colors.END}{'░' * (bar_length - filled_length)}"
             sys.stdout.write(f"\r  {bar} {percent}% ({processed}/{total}) ")
             sys.stdout.flush()
+            return result
 
-    with ThreadPoolExecutor(max_workers=threads) as executor:
-        futures = [executor.submit(check_subdomain, sub) for sub in subdomains]
-        for future in as_completed(futures):
-            if future.result():
-                sub, ip = future.result()
+    async def runner():
+        loop = asyncio.get_running_loop()
+        sem = asyncio.Semaphore(max_tasks)
+        tasks = [asyncio.create_task(check_subdomain(sub, sem, loop)) for sub in subdomains]
+        for coro in asyncio.as_completed(tasks):
+            res = await coro
+            if res:
+                sub, ip = res
                 print(f"\n  {Colors.GREEN}✓ Found: {sub} => {ip}{Colors.END}")
+        print(f"\r{' ' * 70}")
+        return found
 
-    print(f"\r{' ' * 70}")
-    return found
+    return asyncio.run(runner())
