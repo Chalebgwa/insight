@@ -1,13 +1,16 @@
-from .colors import Colors
+import logging
+
+from .colors import Colors  # noqa: F401 (used for ColorFormatter in insight)
+
+logger = logging.getLogger("insight")
 
 def print_status(message, status="info", indent=0):
-    """Professional status printer with indicators"""
-    symbols = {
-        "info": f"{Colors.BLUE}🛈{Colors.END}",
-        "success": f"{Colors.GREEN}✓{Colors.END}",
-        "warning": f"{Colors.YELLOW}⚠{Colors.END}",
-        "error": f"{Colors.RED}✗{Colors.END}",
-        "critical": f"{Colors.BG_RED}☠{Colors.END}"
+    """Log status messages while preserving colored console output."""
+    level_map = {
+        "info": logging.INFO,
+        "success": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL,
     }
-    indent_str = " " * indent
-    print(f"{indent_str}{symbols[status]} {message}")
+    logger.log(level_map.get(status, logging.INFO), message, extra={"indent": indent, "status": status})

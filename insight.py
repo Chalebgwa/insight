@@ -4,10 +4,12 @@ import argparse
 import json
 import sys
 import time
+import os
+import logging
 from urllib.parse import urlparse
 from datetime import datetime
 
-from modules.colors import BANNER
+from modules.colors import BANNER, Colors
 from modules.directory_bruteforce import directory_bruteforce
 from modules.subdomain_enumeration import subdomain_enumeration
 from modules.port_scan import port_scan
@@ -15,8 +17,7 @@ from modules.ssl_analyzer import ssl_analyzer
 from modules.header_analyzer import header_analyzer
 from modules.crawler import crawl_and_analyze
 from modules.summary import print_summary
-from modules.print_status import print_status
-from modules.reporting import generate_html_report, generate_pdf_report
+
 
 
 def main():
@@ -70,10 +71,53 @@ def main():
     )
     parser.add_argument("-c", "--crawl-depth", type=int, default=2, help="Crawling depth")
     parser.add_argument("-o", "--output", help="Output file for results")
-    parser.add_argument("--html-report", help="Write HTML summary to FILE")
-    parser.add_argument("--pdf-report", help="Write PDF summary to FILE")
+
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Logging verbosity",
+    )
+
 
     args = parser.parse_args()
+
+    os.makedirs("logs", exist_ok=True)
+    log_file = os.path.join(
+        "logs", f"insight_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    )
+
+    logger = logging.getLogger("insight")
+    logger.setLevel(getattr(logging, args.log_level))
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(getattr(logging, args.log_level))
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+    )
+
+    class ColorFormatter(logging.Formatter):
+        SYMBOLS = {
+            "info": f"{Colors.BLUE}🛈{Colors.END}",
+            "success": f"{Colors.GREEN}✓{Colors.END}",
+            "warning": f"{Colors.YELLOW}⚠{Colors.END}",
+            "error": f"{Colors.RED}✗{Colors.END}",
+            "critical": f"{Colors.BG_RED}☠{Colors.END}",
+        }
+
+        def format(self, record):
+            status = getattr(record, "status", record.levelname.lower())
+            indent = getattr(record, "indent", 0)
+            symbol = self.SYMBOLS.get(status, self.SYMBOLS["info"])
+            message = super().format(record)
+            return f"{' ' * indent}{symbol} {message}"
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(getattr(logging, args.log_level))
+    console_handler.setFormatter(ColorFormatter("%(message)s"))
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
     if not args.url.startswith("http"):
         args.url = "http://" + args.url
@@ -113,14 +157,20 @@ def main():
     results["modules"]["crawler"] = crawl_results
 
     scan_duration = time.time() - start_time
-    print_status(f"Scan completed in {scan_duration:.2f} seconds", "success")
+    logger.info(
+        f"Scan completed in {scan_duration:.2f} seconds",
+        extra={"status": "success"},
+    )
 
     print_summary(results)
 
     if args.output:
         with open(args.output, "w") as f:
             json.dump(results, f, indent=2)
-        print_status(f"Results saved to {args.output}", "success")
+        logger.info(
+            f"Results saved to {args.output}",
+            extra={"status": "success"},
+        )
 
     if args.html_report:
         generate_html_report(results, args.html_report)
@@ -135,5 +185,5 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print_status("\nScan aborted by user", "error")
+        logging.getLogger("insight").error("\nScan aborted by user")
         sys.exit(1)
