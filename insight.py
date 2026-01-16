@@ -10,7 +10,13 @@ from urllib.parse import urlparse
 from datetime import datetime
 import yaml
 
-from modules.colors import BANNER, Colors
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.panel import Panel
+from rich.table import Table
+from rich import box
+
+from modules.colors import BANNER, Colors, get_banner, console
 from modules.directory_bruteforce import directory_bruteforce
 from modules.subdomain_enumeration import subdomain_enumeration
 from modules.port_scan import port_scan
@@ -26,7 +32,12 @@ from modules import generate_html_report, generate_pdf_report
 
 
 def main():
-    print(BANNER)
+    # Display enhanced banner with Rich
+    try:
+        console.print(get_banner())
+    except Exception:
+        # Fallback to classic banner if Rich fails
+        print(BANNER)
 
     # Parse optional configuration file first
     config_parser = argparse.ArgumentParser(add_help=False)
@@ -199,46 +210,85 @@ def main():
         "target": args.url,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "modules": {},
+        "performance": {},
     }
 
     start_time = time.time()
 
+    # Track performance metrics for each module
+    module_times = {}
+
     if args.dir_wordlist:
+        module_start = time.time()
         dir_results = directory_bruteforce(
             args.url,
             args.dir_wordlist,
             extensions=args.extensions,
             max_tasks=args.max_tasks,
         )
+        module_times["directory_bruteforce"] = time.time() - module_start
         results["modules"]["directory_bruteforce"] = dir_results
 
     if args.sub_wordlist:
+        module_start = time.time()
         domain = urlparse(args.url).netloc
         sub_results = subdomain_enumeration(domain, args.sub_wordlist, max_tasks=args.max_tasks)
+        module_times["subdomain_enumeration"] = time.time() - module_start
         results["modules"]["subdomain_enumeration"] = sub_results
 
+    module_start = time.time()
     port_results = port_scan(args.url, args.ports, max_tasks=args.max_tasks)
+    module_times["port_scan"] = time.time() - module_start
     results["modules"]["port_scan"] = port_results
 
+    module_start = time.time()
     ssl_results = ssl_analyzer(args.url)
+    module_times["ssl_analyzer"] = time.time() - module_start
     results["modules"]["ssl_analyzer"] = ssl_results
 
+    module_start = time.time()
     header_results = header_analyzer(args.url)
+    module_times["header_analyzer"] = time.time() - module_start
     results["modules"]["header_analyzer"] = header_results
 
+    module_start = time.time()
     crawl_results = crawl_and_analyze(args.url, depth=args.crawl_depth)
+    module_times["crawler"] = time.time() - module_start
     results["modules"]["crawler"] = crawl_results
 
     plugins = load_plugins()
     for plugin in plugins:
         name = plugin.__name__.split('.')[-1]
         try:
+            module_start = time.time()
             plugin_results = plugin.run(args.url)
+            module_times[f"plugin_{name}"] = time.time() - module_start
             results["modules"][name] = plugin_results
         except Exception as e:
             print_status(f"Plugin {name} failed: {e}", "error")
 
     scan_duration = time.time() - start_time
+    results["performance"]["total_duration"] = round(scan_duration, 2)
+    results["performance"]["module_times"] = {k: round(v, 2) for k, v in module_times.items()}
+    
+    # Display performance metrics with Rich
+    try:
+        perf_table = Table(title="⚡ Performance Metrics", box=box.ROUNDED)
+        perf_table.add_column("Module", style="cyan", no_wrap=True)
+        perf_table.add_column("Duration", style="magenta", justify="right")
+        
+        for module, duration in module_times.items():
+            perf_table.add_row(module.replace("_", " ").title(), f"{duration:.2f}s")
+        
+        perf_table.add_row("─" * 30, "─" * 10, style="dim")
+        perf_table.add_row("[bold]Total Scan Time[/bold]", f"[bold green]{scan_duration:.2f}s[/bold green]")
+        
+        console.print("\n")
+        console.print(perf_table)
+        console.print("\n")
+    except Exception:
+        pass
+    
     logger.info(
         f"Scan completed in {scan_duration:.2f} seconds",
         extra={"status": "success"},

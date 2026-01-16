@@ -1,4 +1,8 @@
 from datetime import datetime
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -16,6 +20,34 @@ class Colors:
     BG_BLUE = '\033[44m'
     BG_YELLOW = '\033[43m'
 
+console = Console()
+
+def get_banner():
+    """Generate an enhanced banner using Rich"""
+    banner_text = """
+  ░▒▓█▓▒░▒▓███████▓▒░ ░▒▓███████▓▒░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░▒▓█▓▒▒▓███▓▒░▒▓████████▓▒░  ░▒▓█▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░
+  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░
+"""
+    
+    subtitle = f"Advanced Web Pentesting Suite\nVersion 0.2.0 • {datetime.now().strftime('%Y')}"
+    
+    text = Text(banner_text, style="bold blue")
+    text.append("\n")
+    text.append(subtitle, style="bold cyan")
+    
+    return Panel(
+        text,
+        border_style="bright_blue",
+        padding=(1, 2),
+        title="[bold green]🔒 INSIGHT[/bold green]",
+        subtitle="[dim]Security made visible[/dim]"
+    )
+
 BANNER = f"""
 {Colors.BLUE}{Colors.BOLD}
 
@@ -30,5 +62,5 @@ BANNER = f"""
 
 {Colors.END}{Colors.CYAN}{Colors.BOLD}
             Advanced Web Pentesting Suite
-        {Colors.GREEN}Version 2.1 • {datetime.now().strftime('%Y')}{Colors.END}
+        {Colors.GREEN}Version 0.2.0 • {datetime.now().strftime('%Y')}{Colors.END}
 """

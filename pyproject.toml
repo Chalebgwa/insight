@@ -4,14 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "insight-pentest"
-version = "0.1.0"
+version = "0.2.0"
 description = "Advanced web security assessment toolkit for professionals"
 authors = [{name="Pako Chalebgwa"}]
 readme = "readme.md"
 requires-python = ">=3.7"
 license = {text = "MIT"}
 dependencies = [
-    "requests>=2.0"
+    "requests>=2.32.0",
+    "aiohttp>=3.13.0",
+    "jinja2>=3.1.6",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+    "pytest>=9.0.0"
 ]
 
 [project.scripts]
