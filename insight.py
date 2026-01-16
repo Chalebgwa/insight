@@ -161,6 +161,12 @@ def main():
         help="Logging verbosity",
     )
     parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=config.get("rate_limit", 10.0),
+        help="Maximum requests per second (default: 10.0)",
+    )
+    parser.add_argument(
         "--html-report",
         default=config.get("html_report"),
         help="Write HTML report to file",
