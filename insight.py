@@ -24,6 +24,7 @@ from modules.ssl_analyzer import ssl_analyzer
 from modules.header_analyzer import header_analyzer
 from modules.crawler import crawl_and_analyze
 from modules.summary import print_summary
+from modules.config_validator import validate_config
 
 from modules.print_status import print_status
 from modules.plugin_loader import load_plugins
@@ -50,6 +51,14 @@ def main():
             with open(config_args.config) as f:
                 config = yaml.safe_load(f) or {}
             print_status(f"Loaded configuration from {config_args.config}", "info")
+            
+            # Validate configuration
+            validation_errors = validate_config(config)
+            if validation_errors:
+                print_status("Configuration validation failed:", "error")
+                for error in validation_errors:
+                    print_status(f"  - {error}", "error")
+                sys.exit(1)
         except FileNotFoundError:
             print_status(f"Config file not found: {config_args.config}", "error")
             sys.exit(1)
@@ -203,8 +212,28 @@ def main():
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
+    # Enhanced URL validation
     if not args.url.startswith("http"):
         args.url = "http://" + args.url
+    
+    # Validate URL format
+    try:
+        parsed = urlparse(args.url)
+        if not parsed.netloc:
+            print_status("Invalid URL format. Please provide a valid URL.", "error")
+            sys.exit(1)
+    except Exception as e:
+        print_status(f"URL parsing error: {e}", "error")
+        sys.exit(1)
+
+    # Validate wordlist files exist if provided
+    if args.dir_wordlist and not os.path.exists(args.dir_wordlist):
+        print_status(f"Directory wordlist file not found: {args.dir_wordlist}", "error")
+        sys.exit(1)
+    
+    if args.sub_wordlist and not os.path.exists(args.sub_wordlist):
+        print_status(f"Subdomain wordlist file not found: {args.sub_wordlist}", "error")
+        sys.exit(1)
 
     results = {
         "target": args.url,

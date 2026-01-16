@@ -3,6 +3,31 @@
 ![Insight Banner](logo.png)  
 *Advanced web security assessment toolkit for professionals*
 
+## 🎉 What's New in v0.2.0
+
+### ✨ Enhanced User Experience
+- **Beautiful Rich Terminal UI**: Upgraded from basic ANSI colors to the powerful Rich library for stunning visual output
+- **Enhanced Banner**: Eye-catching bordered banner with modern styling
+- **Performance Metrics**: Track and display execution time for each module with beautiful tables
+- **Better Error Messages**: Clear, colorful error reporting with context
+
+### 🔧 Upgraded Dependencies
+- **requests**: Updated to 2.32.5 (latest stable)
+- **jinja2**: Updated to 3.1.6 (latest stable)
+- **aiohttp**: Running on 3.13.3 (latest)
+- **Rich**: New addition for terminal UI (14.2.0)
+- **PyYAML**: Added to requirements (6.0.3)
+
+### 🛡️ Better Security & Validation
+- **Config Validator**: Automatic validation of YAML configuration files
+- **Input Validation**: Enhanced URL and file path validation
+- **Better Error Handling**: Graceful failures with helpful messages
+
+### 📊 Improved Reporting
+- **Stunning HTML Reports**: Modern, responsive design with gradient backgrounds
+- **Performance Data**: Reports now include module execution times
+- **Better Layout**: Cards, tables, and organized sections for easy reading
+
 ## Overview
 
 **Insight** is a comprehensive command-line web penetration testing suite designed for security professionals. It combines multiple scanning techniques into a unified, professional interface with advanced visualization features. With its polished terminal UI and powerful capabilities, Insight helps security teams conduct thorough web security assessments efficiently.
