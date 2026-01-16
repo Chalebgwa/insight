@@ -1,8 +1,10 @@
 import logging
+from rich.console import Console
 
 from .colors import Colors  # noqa: F401 (used for ColorFormatter in insight)
 
 logger = logging.getLogger("insight")
+console = Console()
 
 def print_status(message, status="info", indent=0):
     """Log status messages while preserving colored console output."""

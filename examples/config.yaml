@@ -1,0 +1,44 @@
+# Insight Configuration File Example
+# This file demonstrates the YAML configuration format for Insight
+
+# Target URL (required if not provided via CLI)
+url: "https://example.com"
+
+# Directory bruteforce wordlist path
+# dir_wordlist: "wordlists/directories.txt"
+
+# Subdomain enumeration wordlist path
+# sub_wordlist: "wordlists/subdomains.txt"
+
+# Ports to scan (list of integers)
+ports:
+  - 21
+  - 22
+  - 80
+  - 443
+  - 8080
+  - 8443
+
+# File extensions for directory bruteforce
+extensions:
+  - ""
+  - ".php"
+  - ".html"
+  - ".txt"
+  - ".bak"
+  - ".old"
+  - ".zip"
+
+# Maximum concurrent tasks
+max_tasks: 30
+
+# Crawling depth
+crawl_depth: 2
+
+# Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+log_level: "INFO"
+
+# Output files
+# output: "scan_results.json"
+# html_report: "scan_report.html"
+# pdf_report: "scan_report.pdf"
