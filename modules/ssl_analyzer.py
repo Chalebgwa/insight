@@ -34,7 +34,7 @@ def ssl_analyzer(target):
                 subject = dict(x[0] for x in cert['subject'])['commonName']
 
                 vulns = []
-                if "TLSv1" in tls_version:
+                if tls_version == "TLSv1":
                     vulns.append("TLSv1 (POODLE vulnerable)")
                 if "RC4" in cipher[0]:
                     vulns.append("RC4 cipher (weak)")
